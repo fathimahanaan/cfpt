@@ -1,0 +1,45 @@
+Activity,Type,Unit,Fuel,kgCO2e
+Cars (by market segment),Mini,km,Petrol,0.10996
+Cars (by market segment),Mini,miles,Petrol,0.17696
+Cars (by market segment),Supermini,km,Petrol,0.13452
+Cars (by market segment),Supermini,miles,Petrol,0.21649
+Cars (by market segment),Lower medium,km,Petrol,0.14517
+Cars (by market segment),Lower medium,miles,Petrol,0.23363
+Cars (by market segment),Upper medium,km,Petrol,0.16194
+Cars (by market segment),Upper medium,miles,Petrol,0.26063
+Cars (by market segment),Executive,km,Petrol,0.17088
+Cars (by market segment),Executive,miles,Petrol,0.27501
+Cars (by market segment),Luxury,km,Petrol,0.20632
+Cars (by market segment),Luxury,miles,Petrol,0.33205
+Cars (by market segment),Sports,km,Petrol,0.17323
+Cars (by market segment),Sports,miles,Petrol,0.27879
+Cars (by market segment),Dual purpose 4x4,km,Petrol,0.19973
+Cars (by market segment),Dual purpose 4x4,miles,Petrol,0.32145
+Cars (by market segment),MPV,km,Petrol,0.18072
+Cars (by market segment),MPV,miles,Petrol,0.29085
+Cars (by market segment),Mini,km,Diesel,0.13063
+Cars (by market segment),Mini,miles,Diesel,0.21022
+Cars (by market segment),Supermini,km,Diesel,0.14276
+Cars (by market segment),Supermini,miles,Diesel,0.22974
+Cars (by market segment),Lower medium,km,Diesel,0.16123
+Cars (by market segment),Lower medium,miles,Diesel,0.25948
+Cars (by market segment),Upper medium,km,Diesel,0.18535
+Cars (by market segment),Upper medium,miles,Diesel,0.29828
+Cars (by market segment),Executive,km,Diesel,0.20073
+Cars (by market segment),Executive,miles,Diesel,0.32304
+Cars (by market segment),Luxury,km,Diesel,0.30752
+Cars (by market segment),Luxury,miles,Diesel,0.49490
+Cars (by market segment),Sports,km,Diesel,0.23396
+Cars (by market segment),Sports,miles,Diesel,0.37652
+Cars (by market segment),Dual purpose 4x4,km,Diesel,0.19219
+Cars (by market segment),Dual purpose 4x4,miles,Diesel,0.30930
+Cars (by market segment),MPV,km,Diesel,0.17903
+Cars (by market segment),MPV,miles,Diesel,0.28812
+Motorbike,Small,km,Petrol,0.08319
+Motorbike,Small,miles,Petrol,0.13389
+Motorbike,Medium,km,Petrol,0.10107
+Motorbike,Medium,miles,Petrol,0.16265
+Motorbike,Large,km,Petrol,0.13252
+Motorbike,Large,miles,Petrol,0.21326
+Motorbike,Average,km,Petrol,0.11367
+Motorbike,Average,miles,Petrol,0.18293
