@@ -10,14 +10,13 @@ import EmissionRecord from "../models/emissionRecordModel.js";
 // -----------------------------
 const getOrCreateTodayRecord = async (userId) => {
   const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-  const userObjectId = new mongoose.Types.ObjectId(userId.trim());
 
   let record = await EmissionRecord.findOne({
-    user: userObjectId,
+    user: userId,
     date: today,
   });
   if (!record) {
-    record = new EmissionRecord({ user: userObjectId, date: today });
+    record = new EmissionRecord({ user: userId, date: today });
   }
   return record;
 };
@@ -38,9 +37,8 @@ const updateTotalEmission = (record) => {
 // Main Controller: Calculate & Save All
 // -----------------------------
 export const calculateAllEmissions = async (req, res) => {
-  const { userId, vehicleData, foodItems, energyData } = req.body;
-
-  if (!userId) return res.status(400).json({ message: "userId is required" });
+  const { vehicleData, foodItems, energyData } = req.body;
+  const userId = req.user.userId;
 
   const record = await getOrCreateTodayRecord(userId);
 

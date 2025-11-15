@@ -2,7 +2,10 @@ import mongoose from "mongoose";
 const { Schema, model } = mongoose;
 
 const EmissionRecordSchema = new Schema({
-  user: { type: Schema.Types.ObjectId, ref: "User", required: true },
+  user: {
+    type: String,
+    required: true,
+  },
   date: { type: String, required: true }, // YYYY-MM-DD
   vehicle: {
     type: Object, // { data, totalEmission }
