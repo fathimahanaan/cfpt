@@ -21,6 +21,7 @@ export const authenticateUser = (req, res, next) => {
     req.user = {
       _id: payload._id,
       userId: payload.userId,
+      role: payload.role,
     };
 
     next();
@@ -30,7 +31,7 @@ export const authenticateUser = (req, res, next) => {
 };
 
 export const isAdmin = async (req, res, next) => {
-  if (req.user.role === "admin") {
+  if (req.user && req.user.role === "admin") {
     next();
   } else {
     throw new UnauthorizedError("Access Denied");

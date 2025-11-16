@@ -1,4 +1,5 @@
-import { BadRequestError } from "../error/customErrors";
+import { body, validationResult } from "express-validator";
+import { BadRequestError } from "../error/customErrors.js";
 
 const withValidationErrors = (validateValues) => {
   return [
@@ -24,6 +25,6 @@ export const validateLoginInput = withValidationErrors([
     .notEmpty()
     .withMessage("UserId is required")
     .isUUID()
-    .withMessage("invalid user id format"),
-  body("password").notEmpty().withMessage("password is required"),
+    .withMessage("Invalid user id format"),
+  body("password").notEmpty().withMessage("Password is required"),
 ]);

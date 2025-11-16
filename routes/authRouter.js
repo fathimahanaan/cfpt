@@ -4,11 +4,15 @@ import {
   logout,
   registerUser,
 } from "../controllers/authController.js";
+import {
+  validateLoginInput,
+  validateRegisterInput,
+} from "../middleware/validationMiddleware.js";
 
 const router = Router();
 
-router.post("/register", registerUser);
-router.post("/login", loginUser);
+router.post("/register", validateRegisterInput, registerUser);
+router.post("/login", validateLoginInput, loginUser);
 router.post("/logout", logout);
 
 export default router;
