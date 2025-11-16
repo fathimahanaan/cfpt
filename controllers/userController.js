@@ -1,11 +1,8 @@
+import { NotFoundError } from "../error/customErrors.js";
 import User from "../models/UserModel.js";
 
-export const createUser = async (req, res) => {
-  const { name } = req.body;
-  const newUser = await User.create({
-    name,
-    totalEmission: 0,
-    categoryEmission: { food: 0, energy: 0, water: 0, transport: 0 },
-  });
-  res.status(201).json({ message: "User created", user: newUser });
+export const getAllUser = async (req, res) => {
+  const users = await User.find({ role: "user" }).select("-password");
+  if (!users) throw new NotFoundError("user not found");
+  res.status(200).json(users);
 };

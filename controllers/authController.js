@@ -23,7 +23,7 @@ export const registerUser = async (req, res) => {
   await newUser.save();
 
   // create jwt
-  const token = createJWT({ userId: newUser.userId });
+  const token = createJWT({ userId: newUser.userId, _id: newUser._id });
   const tenDays = 1000 * 60 * 60 * 24 * 10;
 
   res.cookie("token", token, {
@@ -50,7 +50,7 @@ export const loginUser = async (req, res) => {
   const isMatch = await comparePassword(password, user.password);
   if (!isMatch) throw new BadRequestError("Invalid credentials");
 
-  const token = createJWT({ userId: user.userId });
+  const token = createJWT({ userId: user.userId, _id: user._id });
   const tenDays = 1000 * 60 * 60 * 24 * 10;
 
   res.cookie("token", token, {

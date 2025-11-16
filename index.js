@@ -6,7 +6,7 @@ import express from "express";
 import bodyParser from "body-parser";
 import errorHandlerMiddleware from "./middleware/errorHandlerMiddleware.js";
 import cookieParser from "cookie-parser";
-
+import morgan from "morgan";
 //router imports
 import vehicleRouter from "./routes/vehicleRouter.js";
 import userRouter from "./routes/userRouter.js";
@@ -18,6 +18,7 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
+app.use(morgan("dev"));
 
 //routes
 app.use("/api/v1/vehicle", vehicleRouter);

@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-
 import Vehicle from "../models/VehicleModel.js";
 import Food from "../models/FoodModel.js";
 import Energy from "../models/EnergyModel.js";
@@ -101,12 +100,14 @@ export const calculateAllEmissions = async (req, res) => {
       Unit: energyData.unit,
     });
 
+    const emission = factor ? energyData.amount * factor.kg_CO2e : 0;
+
     record.energy = {
       data: energyData,
-      totalEmission: factor ? energyData.amount * factor.kg_CO2e : 0,
+      totalEmission: Number(emission.toFixed(2)),
+      unit: "kg CO2e",
     };
   }
-
   // -----------------------------
   // Update total and save
   // -----------------------------
@@ -117,6 +118,193 @@ export const calculateAllEmissions = async (req, res) => {
     success: true,
     message: "Emissions calculated and saved",
     data: record,
+  });
+};
+export const getWeeklyEmissions = async (req, res) => {
+  const userId = String(req.user._id);
+  console.log("REQ USER ID:", userId);
+  const today = new Date();
+  today.setHours(23, 59, 59, 999);
+
+  const last7 = new Date();
+  last7.setDate(today.getDate() - 6);
+  last7.setHours(0, 0, 0, 0);
+
+  const records = await EmissionRecord.find({
+    user: userId,
+    date: { $gte: last7, $lte: today },
+  }).sort({ date: 1 });
+
+  res.json({
+    success: true,
+    days: records.length,
+    data: records,
+  });
+};
+
+export const getMonthlyEmissions = async (req, res) => {
+  const userId = String(req.user._id);
+
+  const today = new Date();
+  today.setHours(23, 59, 59, 999);
+
+  const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+  monthStart.setHours(0, 0, 0, 0);
+
+  const records = await EmissionRecord.find({
+    user: userId,
+    date: { $gte: monthStart, $lte: today },
+  }).sort({ date: 1 });
+
+  res.json({
+    success: true,
+    days: records.length,
+    data: records,
+  });
+};
+
+export const getMonthlyStats = async (req, res) => {
+  const userId = String(req.user._id);
+
+  const monthStart = new Date();
+  monthStart.setDate(1);
+
+  const today = new Date();
+
+  const records = await EmissionRecord.find({
+    user: userId,
+    date: {
+      $gte: monthStart.toISOString().slice(0, 10),
+      $lte: today.toISOString().slice(0, 10),
+    },
+  });
+
+  let total = 0;
+  let food = 0;
+  let energy = 0;
+  let transport = 0;
+
+  records.forEach((r) => {
+    total += r.totalEmission || 0;
+
+    if (r.vehicle) transport += r.vehicle.totalEmission;
+    if (r.energy) energy += r.energy.totalEmission;
+    if (r.food?.length) {
+      r.food.forEach((f) => (food += f.totalEmission));
+    }
+  });
+
+  res.json({
+    success: true,
+    total: Number(total.toFixed(2)),
+    categories: {
+      food: Number(food.toFixed(2)),
+      energy: Number(energy.toFixed(2)),
+      transport: Number(transport.toFixed(2)),
+    },
+  });
+};
+
+export const getProgress = async (req, res) => {
+  const userId = String(req.user._id);
+
+  const today = new Date();
+  today.setHours(23, 59, 59, 999); // end of today
+
+  // Start of this week (Sunday)
+  const thisWeekStart = new Date(today);
+  thisWeekStart.setDate(today.getDate() - today.getDay());
+  thisWeekStart.setHours(0, 0, 0, 0); // start of day
+
+  // Last week
+  const lastWeekStart = new Date(thisWeekStart);
+  lastWeekStart.setDate(lastWeekStart.getDate() - 7);
+  const lastWeekEnd = new Date(thisWeekStart);
+  lastWeekEnd.setDate(lastWeekEnd.getDate() - 1);
+  lastWeekEnd.setHours(23, 59, 59, 999);
+
+  // This week total
+  const thisWeek = await EmissionRecord.aggregate([
+    {
+      $match: {
+        user: userId,
+        date: { $gte: thisWeekStart, $lte: today },
+      },
+    },
+    { $group: { _id: null, total: { $sum: "$totalEmission" } } },
+  ]);
+
+  // Last week total
+  const lastWeek = await EmissionRecord.aggregate([
+    {
+      $match: {
+        user: userId,
+        date: { $gte: lastWeekStart, $lte: lastWeekEnd },
+      },
+    },
+    { $group: { _id: null, total: { $sum: "$totalEmission" } } },
+  ]);
+
+  const TW = thisWeek[0]?.total || 0;
+  const LW = lastWeek[0]?.total || 0;
+
+  const change = LW === 0 ? 100 : ((TW - LW) / LW) * 100;
+
+  res.json({
+    success: true,
+    thisWeek: TW.toFixed(2),
+    lastWeek: LW.toFixed(2),
+    changePercent: change.toFixed(2),
+  });
+};
+export const getMonthlyProgress = async (req, res) => {
+  const userId = String(req.user._id);
+
+  const today = new Date();
+  today.setHours(23, 59, 59, 999);
+
+  // Start of this month
+  const thisMonthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+  thisMonthStart.setHours(0, 0, 0, 0);
+
+  // Start and end of last month
+  const lastMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+  lastMonthStart.setHours(0, 0, 0, 0);
+
+  const lastMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
+  lastMonthEnd.setHours(23, 59, 59, 999);
+
+  // Sum of emissions this month
+  const thisMonth = await EmissionRecord.aggregate([
+    {
+      $match: {
+        user: userId,
+        date: { $gte: thisMonthStart, $lte: today },
+      },
+    },
+    { $group: { _id: null, total: { $sum: "$totalEmission" } } },
+  ]);
+
+  // Sum of emissions last month
+  const lastMonth = await EmissionRecord.aggregate([
+    {
+      $match: {
+        user: userId,
+        date: { $gte: lastMonthStart, $lte: lastMonthEnd },
+      },
+    },
+    { $group: { _id: null, total: { $sum: "$totalEmission" } } },
+  ]);
+
+  const TM = thisMonth[0]?.total || 0;
+  const LM = lastMonth[0]?.total || 0;
+  const change = LM === 0 ? 100 : ((TM - LM) / LM) * 100;
+
+  res.json({
+    success: true,
+    thisMonth: Number(TM.toFixed(2)),
+    lastMonth: Number(LM.toFixed(2)),
+    changePercent: Number(change.toFixed(2)),
   });
 };
 

@@ -6,7 +6,7 @@ const EmissionRecordSchema = new Schema({
     type: String,
     required: true,
   },
-  date: { type: String, required: true }, // YYYY-MM-DD
+  date: { type: Date, required: true }, // YYYY-MM-DD
   vehicle: {
     type: Object, // { data, totalEmission }
     default: null,

@@ -6,7 +6,9 @@ import {
 } from "../controllers/authController.js";
 
 const router = Router();
+
 router.post("/register", registerUser);
 router.post("/login", loginUser);
 router.post("/logout", logout);
+
 export default router;
