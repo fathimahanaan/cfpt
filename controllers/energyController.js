@@ -53,3 +53,18 @@ export const deleteEnergyData = async (req, res) => {
   if (!energy) throw new NotFoundError(" data not found");
   res.status(200).json({ message: "deleted successfully" });
 };
+
+export const getEnergyOptions = async (req, res) => {
+  const energy = await Energy.find();
+
+  if (!energy.length) {
+    throw new NotFoundError("Energy data not found");
+  }
+
+  const options = {
+    activities: [...new Set(energy.map(v => v.Activity))],
+    units: [...new Set(energy.map(v => v.Unit))],
+  };
+
+  res.status(200).json(options);
+};

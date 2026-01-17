@@ -7,6 +7,8 @@ export const authenticateUser = (req, res, next) => {
 
   if (req.cookies?.token) {
     token = req.cookies.token;
+    console.log("Cookies received:", req.cookies);
+
   } else if (req.headers.authorization?.startsWith("Bearer ")) {
     token = req.headers.authorization.split(" ")[1];
   }

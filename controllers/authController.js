@@ -34,6 +34,7 @@ export const registerUser = async (req, res) => {
     httpOnly: true,
     expires: new Date(Date.now() + tenDays),
     secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
   });
 
   res.status(201).json({
@@ -65,6 +66,7 @@ export const loginUser = async (req, res) => {
     httpOnly: true,
     expires: new Date(Date.now() + tenDays),
     secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
   });
 
   res.status(200).json({

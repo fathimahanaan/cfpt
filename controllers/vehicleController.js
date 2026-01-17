@@ -1,6 +1,5 @@
 import Vehicle from "../models/VehicleModel.js";
 import { NotFoundError } from "../error/customErrors.js";
-import User from "../models/UserModel.js";
 
 export const addVehicleData = async (req, res) => {
   const { activity, type, fuel, unit, kgCO2e } = req.body;
@@ -51,3 +50,29 @@ export const deleteVehicleData = async (req, res) => {
   if (!vehicle) throw new NotFoundError(" data not found");
   res.status(200).json({ message: "deleted successfully" });
 };
+
+export const getVehicleOptions = async (req, res) => {
+  const { activity } = req.query;
+
+  const allVehicles = await Vehicle.find();
+  if (!allVehicles.length) throw new NotFoundError("Vehicle data not found");
+
+  const filteredVehicles = activity
+    ? allVehicles.filter((v) =>
+        v.activity?.trim().toLowerCase() === activity?.trim().toLowerCase()
+      )
+    : allVehicles;
+
+  const options = {
+    activities: [...new Set(allVehicles.map((v) => v.activity))],
+    types: [...new Set(filteredVehicles.map((v) => v.type))],
+    fuels: [...new Set(filteredVehicles.map((v) => v.fuel))],
+    units: [...new Set(filteredVehicles.map((v) => v.unit))],
+  };
+
+  res.status(200).json(options);
+};
+
+
+
+
