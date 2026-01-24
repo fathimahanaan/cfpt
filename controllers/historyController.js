@@ -3,6 +3,7 @@ import Vehicle from "../models/VehicleModel.js";
 import Food from "../models/FoodModel.js";
 import Energy from "../models/EnergyModel.js";
 import EmissionRecord from "../models/emissionRecordModel.js";
+import { NotFoundError } from "../error/customErrors.js";
 
 // -----------------------------
 // Helper: Get or create today's record
@@ -75,7 +76,7 @@ export const calculateAllEmissions = async (req, res) => {
 
       // Check if product already exists in today's record
       const existingIndex = existingFoods.findIndex(
-        (f) => f.data.product.toLowerCase() === item.product.toLowerCase()
+        (f) => f.data.product.toLowerCase() === item.product.toLowerCase(),
       );
 
       if (existingIndex > -1) {
@@ -308,6 +309,36 @@ export const getMonthlyProgress = async (req, res) => {
   });
 };
 
+export const getHistory = async (req, res) => {
+  const userId = req.user.userId; // Solar Squirrel UUID
+
+  const records = await EmissionRecord.find({ user: userId }).sort({
+    date: -1,
+  });
+
+  res.json({
+    success: true,
+    data: records,
+  });
+};
+
+export const deleteHistory = async (req, res) => {
+  const { id } = req.params;
+  console.log("DELETE ID:", id);
+
+  const record = await EmissionRecord.findOneAndDelete({
+    _id: id,
+    user: req.user.userId
+  });
+
+  if (!record) {
+    throw new NotFoundError("History record not found");
+  }
+
+  res.status(200).json({ message: "History record deleted successfully" });
+};
+
+
 // {
 //   "userId": "64fe1234567890abcdef1234",
 //   "vehicleData": {
@@ -326,4 +357,10 @@ export const getMonthlyProgress = async (req, res) => {
 //     "unit": "kWh",
 //     "amount": 50
 //   }
+// }
+
+// passowrd hanaan
+
+// {
+//   "userId": "d3edc871-f5c8-4df3-8b44-049d9b353b14"
 // }
