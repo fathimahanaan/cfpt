@@ -1,20 +1,22 @@
-import { NotBeforeError } from "jsonwebtoken";
 import EducationalResources from "../models/EducationalResoucrcesModel";
 import { NotFoundError } from "../error/customErrors";
 
 export const addResources = async (req, res) => {
-  const { category, title, fact, tip, images } = req.body;
-  const newResoucres = new EducationalResources({
+  const { category, title, fact, tip, image } = req.body;
+
+  const newResources = new EducationalResources({
     category,
     title,
     fact,
     tip,
-    images,
+    image,
   });
-  const savedResoucres = await savedEnergy.save();
+
+  const savedResources = await newResources.save();
+
   res.status(201).json({
-    message: "resources added successfully",
-    Resources: "newResources",
+    message: "Resources added successfully",
+    resources: savedResources,
   });
 };
 
@@ -24,15 +26,15 @@ export const getAllResources = async (req, res) => {
   res.status(200).json(resources);
 };
 
-export const updateResourcesData = async (req, res) => {
-  const { category, title, fact, tip, images } = req.body;
+export const updateResource = async (req, res) => {
+  const { category, title, fact, tip, image } = req.body;
   const { id } = req.params;
   const resources = await EducationalResources.findById(id);
   if (!resources) throw NotFoundError("resoucres not found");
   resources.category = category;
   resources.title = title;
   resources.fact = fact;
-  resources.images = images;
+  resources.image = image;
   await resources.save();
   res.status(200).json({ message: " resoucres field is updated" });
 };
