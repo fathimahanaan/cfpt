@@ -2,8 +2,9 @@ import mongoose from "mongoose";
 import Vehicle from "../models/VehicleModel.js";
 import Food from "../models/FoodModel.js";
 import Energy from "../models/EnergyModel.js";
-import EmissionRecord from "../models/emissionRecordModel.js";
+ 
 import { NotFoundError } from "../error/customErrors.js";
+import EmissionRecord from "../models/EmissionRecordModel.js";
 
 // -----------------------------
 // Helper: Get or create today's record
@@ -328,7 +329,7 @@ export const deleteHistory = async (req, res) => {
 
   const record = await EmissionRecord.findOneAndDelete({
     _id: id,
-    user: req.user.userId
+    user: req.user.userId,
   });
 
   if (!record) {
@@ -337,7 +338,6 @@ export const deleteHistory = async (req, res) => {
 
   res.status(200).json({ message: "History record deleted successfully" });
 };
-
 
 // {
 //   "userId": "64fe1234567890abcdef1234",
