@@ -6,13 +6,13 @@ const EmissionRecordSchema = new Schema({
     type: String,
     required: true,
   },
-  date: { type: Date, required: true }, // YYYY-MM-DD
+  date: { type: Date, required: true },  
   vehicle: {
-    type: Object, // { data, totalEmission }
+    type: Object,  
     default: null,
   },
   food: {
-    type: [Object], // [{ data, totalEmission }]
+    type: [Object],  
     default: [],
   },
   energy: {

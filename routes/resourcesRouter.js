@@ -5,7 +5,8 @@ import {
   getAllResources,
   getSingleResources,
   updateResource,
-} from "../controllers/resourcesController";
+} from "../controllers/resourcesController.js";
+import { authenticateUser, isAdmin } from "../middleware/authenticationMiddleware.js";
 
 const router = Router();
 router.post("/", authenticateUser, isAdmin, addResources);

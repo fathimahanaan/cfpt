@@ -15,6 +15,7 @@ import energyRouter from "./routes/energyRouter.js";
 import foodRouter from "./routes/foodRouter.js";
 import historyRouter from "./routes/histroyRouter.js";
 import authRouter from "./routes/authRouter.js";
+import resourcesRouter from "./routes/resourcesRouter.js"
 const app = express();
 
 const allowedOrigins = [
@@ -50,6 +51,7 @@ app.use("/api/v1/energy", energyRouter);
 app.use("/api/v1/food", foodRouter);
 app.use("/api/v1/history", historyRouter);
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/resources", resourcesRouter);
 
 app.use("*", (req, res) => {
   res.status(404).json({ message: "not found" }); //this error will trigger when the request route do not match any of the above routes

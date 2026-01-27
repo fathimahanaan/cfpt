@@ -1,5 +1,5 @@
-import EducationalResources from "../models/EducationalResoucrcesModel";
-import { NotFoundError } from "../error/customErrors";
+import EducationalResources from "../models/EducationalResoucrcesModel.js";
+import { NotFoundError } from "../error/customErrors.js";
 
 export const addResources = async (req, res) => {
   const { category, title, fact, tip, image } = req.body;
@@ -10,6 +10,7 @@ export const addResources = async (req, res) => {
     fact,
     tip,
     image,
+    createdBy: req.user._id,
   });
 
   const savedResources = await newResources.save();
