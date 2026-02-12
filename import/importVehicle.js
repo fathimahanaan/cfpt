@@ -12,18 +12,18 @@ console.log("Mongo URI:", process.env.MONGODB_URI); // Optional debug
 
 async function main() {
   try {
-    // 1️⃣ Connect to MongoDB Atlas
+     
     await mongoose.connect(process.env.MONGODB_URI);
     console.log("✅ Connected to MongoDB Atlas");
 
-    // 2️⃣ Drop the vehicles collection (ignore error if it doesn't exist)
+  
     await mongoose.connection.db.dropCollection("vehicles").catch(() => {}); // ignore if collection doesn't exist
     console.log("🧹 Existing 'vehicles' collection dropped (if existed).");
 
-    // 3️⃣ Path to CSV file
+ 
     const csvFile = path.join("../data/vehicleEmission.csv"); // Adjust path if needed
     if (!fs.existsSync(csvFile)) {
-      console.error(`❌ CSV file not found at: ${csvFile}`);
+      console.error(` CSV file not found at: ${csvFile}`);
       process.exit(1);
     }
 

@@ -16,12 +16,12 @@ const EmissionRecordSchema = new Schema({
     default: [],
   },
   energy: {
-    type: Object, // { data, totalEmission }
+    type: Object,  
     default: null,
   },
   totalEmission: {
     type: Number,
-    default: 0, // vehicle + sum(food) + energy
+    default: 0, 
   },
   createdAt: { type: Date, default: Date.now },
 });

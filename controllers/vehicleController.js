@@ -24,18 +24,6 @@ export const getAllVehicleData = async (req, res) => {
   res.status(200).json(vehicles);
 };
 
-export const updateVehicleData = async (req, res) => {
-  const { activity, type, fuel, unit, kgCO2e } = req.body;
-  const { id } = req.params;
-  const vehicle = await Vehicle.findById(id);
-  if (!vehicle) throw new NotFoundError("vehicle data not found");
-  vehicle.activity = activity;
-  vehicle.type = type;
-  vehicle.unit = unit;
-  vehicle.kgCO2e = kgCO2e;
-  await vehicle.save();
-  res.status(200).json({ message: "vehicle data field is updated" });
-};
 
 export const getSingleVehicleData = async (req, res) => {
   const { id } = req.params;
@@ -44,12 +32,6 @@ export const getSingleVehicleData = async (req, res) => {
   res.status(200).json(vehicle);
 };
 
-export const deleteVehicleData = async (req, res) => {
-  const { id } = req.params;
-  const vehicle = await Vehicle.findByIdAndDelete(id);
-  if (!vehicle) throw new NotFoundError(" data not found");
-  res.status(200).json({ message: "deleted successfully" });
-};
 
 export const getVehicleOptions = async (req, res) => {
   const { activity } = req.query;

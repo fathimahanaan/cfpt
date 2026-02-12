@@ -259,60 +259,9 @@ export const getProgress = async (req, res) => {
     changePercent: change.toFixed(2),
   });
 };
-export const getMonthlyProgress = async (req, res) => {
-  const userId = String(req.user._id);
-
-  const today = new Date();
-  today.setHours(23, 59, 59, 999);
-
-  // Start of this month
-  const thisMonthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-  thisMonthStart.setHours(0, 0, 0, 0);
-
-  // Start and end of last month
-  const lastMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-  lastMonthStart.setHours(0, 0, 0, 0);
-
-  const lastMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
-  lastMonthEnd.setHours(23, 59, 59, 999);
-
-  // Sum of emissions this month
-  const thisMonth = await EmissionRecord.aggregate([
-    {
-      $match: {
-        user: userId,
-        date: { $gte: thisMonthStart, $lte: today },
-      },
-    },
-    { $group: { _id: null, total: { $sum: "$totalEmission" } } },
-  ]);
-
-  // Sum of emissions last month
-  const lastMonth = await EmissionRecord.aggregate([
-    {
-      $match: {
-        user: userId,
-        date: { $gte: lastMonthStart, $lte: lastMonthEnd },
-      },
-    },
-    { $group: { _id: null, total: { $sum: "$totalEmission" } } },
-  ]);
-
-  const TM = thisMonth[0]?.total || 0;
-  const LM = lastMonth[0]?.total || 0;
-  const change = LM === 0 ? 100 : ((TM - LM) / LM) * 100;
-
-  res.json({
-    success: true,
-    thisMonth: Number(TM.toFixed(2)),
-    lastMonth: Number(LM.toFixed(2)),
-    changePercent: Number(change.toFixed(2)),
-  });
-};
-
+ 
 export const getHistory = async (req, res) => {
-  const userId = req.user.userId; // Solar Squirrel UUID
-
+  const userId = req.user.userId;  
   const records = await EmissionRecord.find({ user: userId }).sort({
     date: -1,
   });

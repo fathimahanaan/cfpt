@@ -57,9 +57,9 @@ export const deleteEnergyData = async (req, res) => {
 export const getEnergyOptions = async (req, res) => {
   const energy = await Energy.find();
 
-  if (!energy.length) {
+  if (!energy.length) 
     throw new NotFoundError("Energy data not found");
-  }
+  
 
   const options = {
     activities: [...new Set(energy.map(v => v.Activity))],
