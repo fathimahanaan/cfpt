@@ -2,9 +2,9 @@ import mongoose from "mongoose";
 import Vehicle from "../models/VehicleModel.js";
 import Food from "../models/FoodModel.js";
 import Energy from "../models/EnergyModel.js";
-
 import { NotFoundError } from "../error/customErrors.js";
 import EmissionRecord from "../models/EmissionRecordModel.js";
+import { fillMissingDays, predictNextDaysML } from "../utils/emissionHelper.js";
 
 // -----------------------------
 // Helper: Get or create today's record
@@ -124,7 +124,7 @@ export const calculateAllEmissions = async (req, res) => {
 };
 
 export const getWeeklyEmissions = async (req, res) => {
-  const userId = req.user.userId; // from login
+  const userId = req.user.userId;
 
   const today = new Date();
   today.setHours(23, 59, 59, 999);
@@ -163,120 +163,42 @@ export const getWeeklyEmissions = async (req, res) => {
     data: weeklyData,
   });
 };
+ 
 
-export const getMonthlyEmissions = async (req, res) => {
-  const userId = String(req.user._id);
+export const getDailyEmission = async (req, res) => {
+  const userId = req.user.userId;
 
-  const today = new Date();
-  today.setHours(23, 59, 59, 999);
+  const today = new Date().toISOString().slice(0, 10);
 
-  const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-  monthStart.setHours(0, 0, 0, 0);
+  const record = await EmissionRecord.findOne({ user: userId, date: today });
 
-  const records = await EmissionRecord.find({
-    user: userId,
-    date: { $gte: monthStart, $lte: today },
-  }).sort({ date: 1 });
-
-  res.json({
-    success: true,
-    days: records.length,
-    data: records,
-  });
-};
-
-export const getMonthlyStats = async (req, res) => {
-  const userId = String(req.user._id);
-
-  const monthStart = new Date();
-  monthStart.setDate(1);
-
-  const today = new Date();
-
-  const records = await EmissionRecord.find({
-    user: userId,
-    date: {
-      $gte: monthStart.toISOString().slice(0, 10),
-      $lte: today.toISOString().slice(0, 10),
-    },
-  });
-
-  let total = 0;
-  let food = 0;
-  let energy = 0;
-  let transport = 0;
-
-  records.forEach((r) => {
-    total += r.totalEmission || 0;
-
-    if (r.vehicle) transport += r.vehicle.totalEmission;
-    if (r.energy) energy += r.energy.totalEmission;
-    if (r.food?.length) {
-      r.food.forEach((f) => (food += f.totalEmission));
-    }
-  });
-
-  res.json({
-    success: true,
-    total: Number(total.toFixed(2)),
-    categories: {
-      food: Number(food.toFixed(2)),
-      energy: Number(energy.toFixed(2)),
-      transport: Number(transport.toFixed(2)),
-    },
-  });
-};
-
-export const getProgress = async (req, res) => {
-  const userId = String(req.user._id);
-
-  const today = new Date();
-  today.setHours(23, 59, 59, 999); // end of today
-
-  // Start of this week (Sunday)
-  const thisWeekStart = new Date(today);
-  thisWeekStart.setDate(today.getDate() - today.getDay());
-  thisWeekStart.setHours(0, 0, 0, 0); // start of day
-
-  // Last week
-  const lastWeekStart = new Date(thisWeekStart);
-  lastWeekStart.setDate(lastWeekStart.getDate() - 7);
-  const lastWeekEnd = new Date(thisWeekStart);
-  lastWeekEnd.setDate(lastWeekEnd.getDate() - 1);
-  lastWeekEnd.setHours(23, 59, 59, 999);
-
-  // This week total
-  const thisWeek = await EmissionRecord.aggregate([
-    {
-      $match: {
-        user: userId,
-        date: { $gte: thisWeekStart, $lte: today },
+  if (!record) {
+    return res.status(200).json({
+      success: true,
+      data: {
+        vehicle: 0,
+        food: 0,
+        energy: 0,
+        total: 0,
       },
-    },
-    { $group: { _id: null, total: { $sum: "$totalEmission" } } },
-  ]);
+    });
+  }
 
-  // Last week total
-  const lastWeek = await EmissionRecord.aggregate([
-    {
-      $match: {
-        user: userId,
-        date: { $gte: lastWeekStart, $lte: lastWeekEnd },
-      },
-    },
-    { $group: { _id: null, total: { $sum: "$totalEmission" } } },
-  ]);
+  // Calculate emissions per category
+  const vehicleEmission = record.vehicle ? record.vehicle.totalEmission : 0;
+  const foodEmission = record.food
+    ? record.food.reduce((sum, item) => sum + item.totalEmission, 0)
+    : 0;
+  const energyEmission = record.energy ? record.energy.totalEmission : 0;
 
-  const TW = thisWeek[0]?.total || 0;
-  const LW = lastWeek[0]?.total || 0;
-
-  const change = LW === 0 ? 100 : ((TW - LW) / LW) * 100;
-
-  res.json({
+  res.status(200).json({
     success: true,
-    thisWeek: TW.toFixed(2),
-    lastWeek: LW.toFixed(2),
-    changePercent: change.toFixed(2),
+    data: {
+      vehicle: vehicleEmission,
+      food: foodEmission,
+      energy: energyEmission,
+      total: record.totalEmission || 0,
+    },
   });
 };
 
@@ -307,29 +229,72 @@ export const deleteHistory = async (req, res) => {
 
   res.status(200).json({ message: "History record deleted successfully" });
 };
+ 
 
-// {
-//   "userId": "64fe1234567890abcdef1234",
-//   "vehicleData": {
-//     "activity": "Cars (by market segment)",
-//     "type": "Mini",
-//     "unit": "km",
-//     "fuel": "Petrol",
-//     "distance": 100
-//   },
-//   "foodItems": [
-//     { "product": "Milk", "amount": 1, "unit": "kg" },
-//     { "product": "Beef", "amount": 500, "unit": "g" }
-//   ],
-//   "energyData": {
-//     "activity": "Electricity generated",
-//     "unit": "kWh",
-//     "amount": 50
-//   }
-// }
+ 
 
-// passowrd hanaan
+ 
 
-// {
-//   "userId": "d3edc871-f5c8-4df3-8b44-049d9b353b14"
-// }
+export const getDailyPrediction = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    const records = await EmissionRecord.find({ user: userId }).sort({ date: 1 });
+
+    if (!records.length) {
+      return res.status(200).json({ success: true, predicted: [] });
+    }
+
+    const rawData = records.map(r => {
+      const vehicleValue = r.vehicle?.totalEmission ?? 0;
+      const foodValue = Array.isArray(r.food)
+        ? r.food.reduce((sum, item) => sum + (item.totalEmission ?? 0), 0)
+        : 0;
+      const energyValue = r.energy?.totalEmission ?? 0;
+
+      const dateString = new Date(r.date).toISOString().split("T")[0];
+
+      console.log("📝 Parsed record:", {
+        date: dateString,
+        vehicle: vehicleValue,
+        food: foodValue,
+        energy: energyValue,
+      });
+
+      return {
+        date: dateString,
+        vehicle: vehicleValue,
+        food: foodValue,
+        energy: energyValue,
+      };
+    });
+
+    console.log("📌 Raw data ready for ML:", rawData);
+
+    const filled = fillMissingDays(
+      rawData,
+      rawData[0].date,
+      rawData[rawData.length - 1].date
+    );
+
+    console.log("📌 Filled timeline:", filled);
+
+    const predicted = predictNextDaysML(filled, 7);
+
+    console.log("📌 Predicted values:", predicted);
+
+    res.status(200).json({
+      success: true,
+      predicted,
+    });
+
+  } catch (error) {
+    console.error("❌ Prediction error:", error);
+    res.status(500).json({ success: false, message: "Prediction failed" });
+  }
+};
+
+ 
+
+
+ 

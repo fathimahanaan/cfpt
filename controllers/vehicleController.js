@@ -40,16 +40,16 @@ export const getVehicleOptions = async (req, res) => {
   if (!allVehicles.length) throw new NotFoundError("Vehicle data not found");
 
   const filteredVehicles = activity
-    ? allVehicles.filter((v) =>
-        v.activity?.trim().toLowerCase() === activity?.trim().toLowerCase()
+    ? allVehicles.filter((vehicle) =>
+        vehicle.activity?.trim().toLowerCase() === activity?.trim().toLowerCase()
       )
     : allVehicles;
 
   const options = {
-    activities: [...new Set(allVehicles.map((v) => v.activity))],
-    types: [...new Set(filteredVehicles.map((v) => v.type))],
-    fuels: [...new Set(filteredVehicles.map((v) => v.fuel))],
-    units: [...new Set(filteredVehicles.map((v) => v.unit))],
+    activities: [...new Set(allVehicles.map((vehicle) => vehicle.activity))],
+    types: [...new Set(filteredVehicles.map((vehicle) => vehicle.type))],
+    fuels: [...new Set(filteredVehicles.map((vehicle) => vehicle.fuel))],
+    units: [...new Set(filteredVehicles.map((vehicle) => vehicle.unit))],
   };
 
   res.status(200).json(options);
