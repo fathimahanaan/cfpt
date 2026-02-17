@@ -62,8 +62,8 @@ export const getEnergyOptions = async (req, res) => {
   
 
   const options = {
-    activities: [...new Set(energy.map(v => v.Activity))],
-    units: [...new Set(energy.map(v => v.Unit))],
+    activities: [...new Set(energy.map(options => options.Activity))],
+    units: [...new Set(energy.map(options => options.Unit))],
   };
 
   res.status(200).json(options);

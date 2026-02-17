@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import Vehicle from "../models/VehicleModel.js";
 import Food from "../models/FoodModel.js";
 import Energy from "../models/EnergyModel.js";
- 
+
 import { NotFoundError } from "../error/customErrors.js";
 import EmissionRecord from "../models/EmissionRecordModel.js";
 
@@ -122,9 +122,10 @@ export const calculateAllEmissions = async (req, res) => {
     data: record,
   });
 };
+
 export const getWeeklyEmissions = async (req, res) => {
-  const userId = String(req.user._id);
-  console.log("REQ USER ID:", userId);
+  const userId = req.user.userId; // from login
+
   const today = new Date();
   today.setHours(23, 59, 59, 999);
 
@@ -137,10 +138,29 @@ export const getWeeklyEmissions = async (req, res) => {
     date: { $gte: last7, $lte: today },
   }).sort({ date: 1 });
 
-  res.json({
+  const recordMap = {};
+  records.forEach((r) => {
+    recordMap[new Date(r.date).toDateString()] = r.totalEmission || 0;
+  });
+
+  const weeklyData = Array.from({ length: 7 }, (_, i) => {
+    const date = new Date();
+    date.setDate(today.getDate() - (6 - i));
+
+    return {
+      date: date.toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "2-digit",
+        day: "2-digit",
+      }),
+      emission: recordMap[date.toDateString()] || 0,
+    };
+  });
+
+  res.status(200).json({
     success: true,
-    days: records.length,
-    data: records,
+    days: weeklyData.length,
+    data: weeklyData,
   });
 };
 
@@ -259,9 +279,9 @@ export const getProgress = async (req, res) => {
     changePercent: change.toFixed(2),
   });
 };
- 
+
 export const getHistory = async (req, res) => {
-  const userId = req.user.userId;  
+  const userId = req.user.userId;
   const records = await EmissionRecord.find({ user: userId }).sort({
     date: -1,
   });

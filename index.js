@@ -21,6 +21,7 @@ const app = express();
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
+  "sparkly-cat-56056d.netlify.app"
 ];
 
 app.use(
@@ -70,4 +71,4 @@ try {
   console.log(error);
   process.exit(1);
 }
-//just 
+ 

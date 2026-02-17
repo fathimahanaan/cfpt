@@ -1,9 +1,10 @@
-import { NotFoundError } from "../error/customErrors.js";
+ 
 import User from "../models/UserModel.js";
 import { v4 as uuidv4 } from "uuid";
 import { createJWT } from "../utils/jwtUtils.js";
 import { comparePassword, hashPassword } from "../utils/bcrypt.js";
 import { getRandomName } from "../utils/funnyNames.js";
+import { BadRequestError } from "../error/customErrors.js";
 
 export const registerUser = async (req, res) => {
   const { password } = req.body;
